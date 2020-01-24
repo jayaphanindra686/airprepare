@@ -322,6 +322,11 @@ public class Homescreen extends AppCompatActivity {
         else
             Toast.makeText(this, "pressed 2", Toast.LENGTH_SHORT).show();
     }
+
+    public void Alarm(View view) {
+        Intent intent = new Intent(this, Alarm.class);
+        startActivity(intent);
+    }
     /* @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         menuItem.setCheckable(true);
