@@ -7,6 +7,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -19,7 +20,9 @@ import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,10 +31,15 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.app.NotificationCompat;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.jgabrielfreitas.core.BlurImageView;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,16 +47,24 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import eightbitlab.com.blurview.BlurView;
+import eightbitlab.com.blurview.RenderScriptBlur;
 import me.relex.circleindicator.CircleIndicator;
 
 
-public class Homescreen extends AppCompatActivity {
-    public int i = 0;
+public class Homescreen extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    public Toast t;
+    public int i = 0, pl = 0;
     public String loc;
+    EditText editText;
     TextView tv;
+    BlurImageView blurImageView;
+    Button button;
+    BlurView blurView;
     public Button ngetlocation;
     public String cur_city;
     int count = 0;
+    int t1 = 0;
     android.os.Handler customHandler = new android.os.Handler();
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle actionBarDrawerToggle;
@@ -59,12 +75,23 @@ public class Homescreen extends AppCompatActivity {
         }
     };
     public ViewPager viewPager;
+    androidx.appcompat.widget.Toolbar toolbar;
     CircleIndicator circleIndicator;
+    NavigationView nav_draw;
+    DatabaseReference databaseReference1;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        toolbar = findViewById(R.id.toolbar);
+
+        setSupportActionBar(toolbar);
+        nav_draw = findViewById(R.id.nvView);
+        nav_draw.setNavigationItemSelectedListener(this);
+
         super.onCreate(savedInstanceState);
+        t = new Toast(this);
+        databaseReference1 = FirebaseDatabase.getInstance().getReference().child("FLIGHTS");
         setContentView(R.layout.activity_homescreen);/*
         AnimationDrawable animationDrawable = new AnimationDrawable();
         animationDrawable.addFrame(getResources().getDrawable(R.drawable.floods), 5000);
@@ -72,6 +99,7 @@ public class Homescreen extends AppCompatActivity {
         animationDrawable.addFrame(getResources().getDrawable(R.drawable.bundh), 5000);
         animationDrawable.setOneShot(false);
         animationDrawable.start();*/
+        blurView = findViewById(R.id.blurview);
         viewPager = findViewById(R.id.viewpager);
         ImageAdapter adapter = new ImageAdapter(this);
         viewPager.setAdapter(adapter);
@@ -92,10 +120,15 @@ public class Homescreen extends AppCompatActivity {
         floatingActionButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                Toast.makeText(Homescreen.this, "Hello", Toast.LENGTH_SHORT).show();
+
+                if (pl != 0)
+                    blurImageView.setVisibility(View.VISIBLE);
+                blurbackground1();
+                t1 = 12;
                 return false;
             }
         });
+
         viewPager.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 if (tapGestureDetector.onTouchEvent(event))
@@ -126,7 +159,7 @@ public class Homescreen extends AppCompatActivity {
                 handler.post(Update);
             }
         }, 10000, 10000);
-
+        button = findViewById(R.id.button);
 
         ngetlocation = findViewById(R.id.getLocation);
         customHandler.postDelayed(updateTimerThread, 0);
@@ -139,8 +172,13 @@ public class Homescreen extends AppCompatActivity {
 
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.flContent, new HomeFragment()).commit();
+            nav_draw.setCheckedItem(R.id.first);
+        }
 
     }
+
 
 
     public void logout(View view) {
@@ -327,15 +365,100 @@ public class Homescreen extends AppCompatActivity {
         Intent intent = new Intent(this, Alarm.class);
         startActivity(intent);
     }
-    /* @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-        menuItem.setCheckable(true);
-        int id = menuItem.getItemId();
-        if (id == R.id.nav_acc) {
-            Intent i1 = new Intent(this, Help.class);
-            startActivity(i1);
+
+    public void blur(View view) {
+        if (t1 == 0)
+            Toast.makeText(this, "press and hold long for emergency", Toast.LENGTH_SHORT).show();
+    }
+
+    private void blurbackground1() {
+        pl = 1;
+        blurImageView = findViewById(R.id.myblur);
+        Drawable d = getDrawable(R.drawable.blur);
+        blurImageView.setImageDrawable(d);
+        blurImageView.setClickable(true);
+        blurImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+            }
+        });
+
+        blurImageView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    String x = String.valueOf(event.getX());
+                    Toast.makeText(Homescreen.this, x, Toast.LENGTH_SHORT).show();
+
+                    blurImageView.setVisibility(View.INVISIBLE);
+                }
+                return true;
+            }
+        });
+
+    }
+
+    private void blurbackground() {
+
+
+        float radius = 20f;
+
+        View decorView = getWindow().getDecorView();
+        //ViewGroup you want to start blur from. Choose root as close to BlurView in hierarchy as possible.
+        ViewGroup rootView = decorView.findViewById(android.R.id.content);
+        //Set drawable to draw in the beginning of each blurred frame (Optional).
+        //Can be used in case your layout has a lot of transparent space and your content
+        //gets kinda lost after after blur is applied.
+        Drawable windowBackground = getResources().getDrawable(R.drawable.bundh, getApplicationContext().getTheme());
+
+        blurView.setupWith(rootView)
+                .setFrameClearDrawable(windowBackground)
+                .setBlurAlgorithm(new RenderScriptBlur(this))
+                .setBlurRadius(radius)
+                .setHasFixedTransformationMatrix(true);
+        button.setVisibility(View.VISIBLE);
+
+    }
+
+    public void getData(View view) {
+        Intent i = new Intent(this, flight_details.class);
+        startActivity(i);
+
+        //Toast.makeText(Homescreen.this, Date1, Toast.LENGTH_SHORT).show();
+
+
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.nav_acc1:
+                getSupportFragmentManager().beginTransaction().replace(R.id.flContent, new AboutFragment()).addToBackStack(null).commit();
+                break;
+            case R.id.nav_acc:
+                getSupportFragmentManager().beginTransaction().replace(R.id.flContent, new HelpFragment()).addToBackStack(null).commit();
+                break;
+            case R.id.nav_acc3:
+                getSupportFragmentManager().beginTransaction().replace(R.id.flContent, new SetFragment()).addToBackStack(null).commit();
+                break;
+            case R.id.first:
+                getSupportFragmentManager().beginTransaction().replace(R.id.flContent, new HomeFragment()).commit();
+                nav_draw.setCheckedItem(R.id.first);
+                break;
         }
-        drawerLayout.closeDrawers();
+        drawerLayout.closeDrawer(GravityCompat.START);
         return true;
-    }*/
+
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
 }

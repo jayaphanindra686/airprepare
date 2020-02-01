@@ -63,7 +63,7 @@
 
         android:layout_marginRight="8dp"
 
-        android:text="@string/number_authentication"
+        android:text="number_authentication"
 
         android:textSize="20sp"
 
