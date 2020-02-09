@@ -26,8 +26,8 @@
         <!-- The main content view where fragments are loaded -->
         <FrameLayout
             android:id="@+id/flContent"
+            android:layout_height="350dp"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <LinearLayout
@@ -52,7 +52,6 @@
                         android:layout_width="56sp"
                         android:layout_height="36sp"
                         android:layout_marginTop="5sp" />
-
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -90,7 +89,8 @@
                         android:id="@+id/button8"
                         android:layout_width="80sp"
                         android:layout_height="80sp"
-                        android:background="@mipmap/restaurants" />
+                        android:background="@mipmap/restaurants"
+                        android:onClick="getData" />
 
 
                     <Button
@@ -112,6 +112,7 @@
                         android:layout_width="80sp"
                         android:layout_height="80sp"
                         android:background="@mipmap/tourism"
+                        android:onClick="blurr"
                         tools:ignore="ButtonStyle" />
 
                     <Button
@@ -183,57 +184,77 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="                                                                                                       Assist"
+                    android:text="                                                                                               Assist"
                     android:textStyle="bold" />
 
-                <androidx.viewpager.widget.ViewPager
-                    android:id="@+id/viewpager"
-                    android:layout_width="match_parent"
-                    android:layout_height="200dp"
-                    android:clickable="true"></androidx.viewpager.widget.ViewPager>
+                <!--      <androidx.viewpager.widget.ViewPager
+                          android:id="@+id/viewpager"
+                          android:layout_width="match_parent"
+                          android:layout_height="200dp"
+                          android:clickable="true"
+                          android:onClick="getImage">
+                      </androidx.viewpager.widget.ViewPager>
 
 
-                <me.relex.circleindicator.CircleIndicator
-                    android:id="@+id/indicator"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    app:ci_drawable="@drawable/indicator" />
+
+                      <me.relex.circleindicator.CircleIndicator
+                          android:id="@+id/indicator"
+                          android:layout_width="match_parent"
+                          android:layout_height="40dp"
+                          app:ci_drawable="@drawable/indicator" />-->
+
 
             </LinearLayout>
 
+
+            <eightbitlab.com.blurview.BlurView
+                android:id="@+id/blurview"
+                android:layout_width="100dp"
+                android:layout_height="100dp">
+
+            </eightbitlab.com.blurview.BlurView>
+
+
+        </FrameLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="250dp">
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+
                 android:layout_gravity="right"
-                android:layout_marginTop="570dp"
-                android:layout_marginRight="20dp"
-                android:src="@drawable/emergency1" />
+                android:src="@drawable/emergency1"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.923"
+                app:layout_constraintStart_toStartOf="@+id/rv"
+                app:layout_constraintTop_toTopOf="@+id/rv"
+                app:layout_constraintVertical_bias="0.917" />
 
-            <eightbitlab.com.blurview.BlurView
-                android:id="@+id/blurview"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="250dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-            </eightbitlab.com.blurview.BlurView>
+            </androidx.recyclerview.widget.RecyclerView>
 
-            <com.jgabrielfreitas.core.BlurImageView
-                android:id="@+id/myblur"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-        </FrameLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
 
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nvView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
         app:headerLayout="@layout/navigation_drawer_header"
         app:itemIconTint="#000"
+        android:layout_gravity="start"
         app:menu="@menu/navigation_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

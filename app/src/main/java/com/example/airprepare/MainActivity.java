@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,18 +14,16 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-
-
+import com.google.firebase.database.ValueEventListener;
 
 
 public class MainActivity extends AppCompatActivity {
+    DatabaseReference databaseReference1, databaseReference2;
 
 
     Button createaccountb, login;
@@ -45,13 +42,21 @@ public class MainActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
 
-    private FirebaseAuth.AuthStateListener authStateListener;
+    int repeat = 100;
 
+    Intent intent;
+
+    private FirebaseAuth.AuthStateListener authStateListener;
 
 
     @Override
 
     protected void onCreate(Bundle savedInstanceState) {
+
+        intent = new Intent(this, Homescreen.class);
+
+
+        databaseReference1 = FirebaseDatabase.getInstance().getReference("USERS");
 
         super.onCreate(savedInstanceState);
 
@@ -76,15 +81,13 @@ public class MainActivity extends AppCompatActivity {
         progressDialog.setCanceledOnTouchOutside(false);
 
 
-
-        if(firebaseAuth.getCurrentUser()!= null){
+        if (firebaseAuth.getCurrentUser() != null) {
 
             finish();
 
-            startActivity( new Intent(this,Homescreen.class));
+            startActivity(new Intent(this, Homescreen.class));
 
         }
-
 
 
     }
@@ -94,11 +97,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         SharedPreferences sharedPreferences;
-        sharedPreferences = getSharedPreferences("Data",MODE_APPEND);
-        String mbno = sharedPreferences.getString("mbno","");
-        String pass = sharedPreferences.getString("pass","");
-        if(mbno != null && pass != null){
-            Intent i1 = new Intent(this,Homescreen.class);
+        sharedPreferences = getSharedPreferences("Data", MODE_APPEND);
+        String mbno = sharedPreferences.getString("mbno", "");
+        String pass = sharedPreferences.getString("pass", "");
+        if (mbno != null && pass != null) {
+            //  Intent i1 = new Intent(this, Homescreen.class);
+            startActivity(intent);
         }
 
     }
@@ -106,17 +110,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void Opennunberactivity(View view) {
 
-        Intent i = new Intent(this,numberauthentication.class);
+        Intent i = new Intent(this, numberauthentication.class);
 
         startActivity(i);
 
     }
 
 
-
     public void openHomescreen(View view) {
-
-        login.setClickable(false);
+        // login.setClickable(false);
 
         if (number.getText().toString() == null || number.getText().toString().equals("") && password.getText().toString() == null || password.getText().toString().equals("")) {
 
@@ -124,60 +126,64 @@ public class MainActivity extends AppCompatActivity {
 
         } else {
 
-            progressDialog.show();
+            //     progressDialog.show();
 
-            final String num, pass;
+            final String num1, pass;
 
-            num = number.getText().toString();
-
+            num1 = number.getText().toString();
             pass = password.getText().toString();
-
-            mAuth = FirebaseAuth.getInstance();
-
-            String email = num + "@gmail.com";
-
-
-
-            mAuth.createUserWithEmailAndPassword(email, pass).addOnCompleteListener(MainActivity.this, new OnCompleteListener<AuthResult>() {
-
+            databaseReference1.addValueEventListener(new ValueEventListener() {
                 @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot ds : dataSnapshot.getChildren()) {
 
-                public void onComplete(@NonNull Task<AuthResult> task) {
+                        String passw = ds.child("pass").getValue(String.class);
+                        String number = ds.child("phnumber").getValue(String.class);
 
-                    if (task.isSuccessful()) {
-
-                        Log.d("User Login", "signInWithEmail::success");
-
-                        FirebaseUser user = mAuth.getCurrentUser();
-
-                        progressDialog.dismiss();
-
-
-
-                        Intent i = new Intent(MainActivity.this, Homescreen.class);
-
-                        i.putExtra("number1", num);
-
-                        startActivity(i);
-
-                    } else {
-
-                        Log.w("Student Login", "signInWithEmail::failure", task.getException());
-
-                        progressDialog.dismiss();
-
-                        Toast.makeText(MainActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
-
-
+                        //for(int i = 0; i < num.length() ; i++){
+                            /*if(num.charAt(i) == '*'){
+                                if(num.charAt(i+1)== '/'){
+                                    if(num.charAt(i+2)=='/' ){
+                                        if(num.charAt(i+3)=='*'){
+                                           String substr1 =  num.substring(0,i);
+                                           String substr2 = num.substring(i+4);
+                                           if((num1 == substr1) && (pass == substr2)) {
+                                               repeat = 0;
+                                               Toast.makeText(MainActivity.this, substr1 + "pp" + substr2, Toast.LENGTH_SHORT).show();
+                                               break;
+                                           }
+                                        }
+                                    }
+                                }
+                            }*/
+                        if (passw.equals(pass)) {
+                            if (number.equals(num1)) {
+                                Toast.makeText(MainActivity.this, "Successful", Toast.LENGTH_SHORT).show();
+                                startActivity(intent);
+                                break;
+                            }
+                        }
 
                     }
 
+                   /*     if (num.equals(number)) {
+
+
+                            String date = ds.child("DATE").getValue().toString();
+                            String from = ds.child("FROM").getValue().toString();
+                            String time = ds.child("TIME").getValue().toString();
+                            String to = ds.child("TO").getValue().toString();
+                            String day = ds.child("DAY").getValue().toString();
+
+                        }*/
+
                 }
 
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
             });
-
         }
-
     }
-
 }

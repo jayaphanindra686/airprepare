@@ -18,7 +18,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class register extends AppCompatActivity {
 
-    EditText ename,eemail,epassword;
+    EditText cpassword, epassword;
 
     DatabaseReference databasemember;
 
@@ -38,10 +38,10 @@ public class register extends AppCompatActivity {
 
         databasemember = FirebaseDatabase.getInstance().getReference("USERS");
 
-        eemail=findViewById(R.id.emailr);
+        // eemail=findViewById(R.id.emailr);
 
         epassword=findViewById(R.id.passwordr);
-
+        cpassword = findViewById(R.id.cpasswordr);
         firebaseAuth=FirebaseAuth.getInstance();
     }
 
@@ -56,19 +56,18 @@ public class register extends AppCompatActivity {
 
     private void addmember(){
 
-        String email=eemail.getText().toString().trim();
+        // String email=eemail.getText().toString().trim();
 
         String password=epassword.getText().toString().trim();
 
         String number=getIntent().getStringExtra("number");
 
-        String a = number + "";
 
-
-        if (!TextUtils.isEmpty(email)) {
+        if (!TextUtils.isEmpty(password)) {
             String id = databasemember.push().getKey();
-            databasemember.child(id).setValue(password);
-            databasemember.child(id).setValue(number);
+
+            databasemember.child(id).child("phnumber").setValue(number);
+            databasemember.child(id).child("pass").setValue(password);
             Toast.makeText(this, "REGISTRATION SUCCESS", Toast.LENGTH_SHORT).show();
 
         }

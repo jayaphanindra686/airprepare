@@ -14,7 +14,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.telephony.SmsManager;
 import android.view.GestureDetector;
 import android.view.MenuItem;
@@ -22,17 +21,19 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.app.NotificationCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -42,10 +43,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.jgabrielfreitas.core.BlurImageView;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import eightbitlab.com.blurview.BlurView;
 import eightbitlab.com.blurview.RenderScriptBlur;
@@ -53,10 +53,11 @@ import me.relex.circleindicator.CircleIndicator;
 
 
 public class Homescreen extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    public String[] imageurls;
     public Toast t;
     public int i = 0, pl = 0;
+    RecyclerView recyclerView;
     public String loc;
-    EditText editText;
     TextView tv;
     BlurImageView blurImageView;
     Button button;
@@ -75,24 +76,33 @@ public class Homescreen extends AppCompatActivity implements NavigationView.OnNa
         }
     };
     public ViewPager viewPager;
-    androidx.appcompat.widget.Toolbar toolbar;
+    Toolbar toolbar;
     CircleIndicator circleIndicator;
     NavigationView nav_draw;
     DatabaseReference databaseReference1;
-
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        toolbar = findViewById(R.id.toolbar);
+        setContentView(R.layout.activity_homescreen);
+        imageurls = new String[]{"https://firebasestorage.googleapis.com/v0/b/airprepare.appspot.com/o/uploads%2F1580376870827.jpg?alt=media&token=6df7e9b2-0a09-4d23-ae07-055f0f490b3f", "https://firebasestorage.googleapis.com/v0/b/airprepare.appspot.com/o/uploads%2F1580376883984.jpg?alt=media&token=7142d928-a10b-4694-a2b7-10ee80adc244", "https://firebasestorage.googleapis.com/v0/b/airprepare.appspot.com/o/uploads%2F1580376890100.jpg?alt=media&token=3ce387e2-0c8c-4b31-a235-c384f0926caa"};
+        ArrayList<String> imgUrls = new ArrayList<>();
+        imgUrls.add("https://firebasestorage.googleapis.com/v0/b/airprepare.appspot.com/o/uploads%2F1580376870827.jpg?alt=media&token=6df7e9b2-0a09-4d23-ae07-055f0f490b3f");
+        imgUrls.add("https://firebasestorage.googleapis.com/v0/b/airprepare.appspot.com/o/uploads%2Fravana.jpg?alt=media&token=b282b618-a89d-47dd-994b-73ed06720a17");
+        imgUrls.add("https://firebasestorage.googleapis.com/v0/b/airprepare.appspot.com/o/uploads%2Fthor%20mjolnir.jpg?alt=media&token=f1f9f600-236f-49b1-b807-4bb500897d7a");
+        imgUrls.add("https://firebasestorage.googleapis.com/v0/b/airprepare.appspot.com/o/uploads%2Femergeny.jpeg?alt=media&token=2012dbb4-afe5-4176-ab6a-6413b5e1adfb");
+        imgUrls.add("https://firebasestorage.googleapis.com/v0/b/airprepare.appspot.com/o/uploads%2Felections.jpg?alt=media&token=7fa1b025-1ea4-4f31-afcb-b05bd65b91d1");
+        imgUrls.add("https://firebasestorage.googleapis.com/v0/b/airprepare.appspot.com/o/uploads%2Felections1.jpg?alt=media&token=fe340a12-0914-46ac-93e1-d4370f2c3462");
+        imgUrls.add("https://firebasestorage.googleapis.com/v0/b/airprepare.appspot.com/o/uploads%2Fbundh.jpg?alt=media&token=8306ec27-8cb0-4249-bc75-8cd37d3ca320");
+        imgUrls.add("https://firebasestorage.googleapis.com/v0/b/airprepare.appspot.com/o/uploads%2Ffloods.png?alt=media&token=1a3bbaa5-aad9-4843-8151-9d90c78f5405");
+        super.onCreate(savedInstanceState);
+        toolbar = findViewById(R.id.toolbar1);
 
         setSupportActionBar(toolbar);
         nav_draw = findViewById(R.id.nvView);
         nav_draw.setNavigationItemSelectedListener(this);
-
-        super.onCreate(savedInstanceState);
         t = new Toast(this);
         databaseReference1 = FirebaseDatabase.getInstance().getReference().child("FLIGHTS");
-        setContentView(R.layout.activity_homescreen);/*
+        /*
         AnimationDrawable animationDrawable = new AnimationDrawable();
         animationDrawable.addFrame(getResources().getDrawable(R.drawable.floods), 5000);
         animationDrawable.addFrame(getResources().getDrawable(R.drawable.elections), 5000);
@@ -100,20 +110,21 @@ public class Homescreen extends AppCompatActivity implements NavigationView.OnNa
         animationDrawable.setOneShot(false);
         animationDrawable.start();*/
         blurView = findViewById(R.id.blurview);
-        viewPager = findViewById(R.id.viewpager);
-        ImageAdapter adapter = new ImageAdapter(this);
-        viewPager.setAdapter(adapter);
+        //   viewPager = findViewById(R.id.viewpager);
+        //  ImageAdapter adapter = new ImageAdapter(this);
+        ImageListAdapter adapter = new ImageListAdapter(this, imageurls);
+      /*  viewPager.setAdapter(adapter);
         circleIndicator = findViewById(R.id.indicator);
         circleIndicator.setViewPager(viewPager);
         final Handler handler = new Handler();
         final Runnable Update = new Runnable() {
-            public void run() {
+          public void run() {
                 if (i == 3) {
                     i = 0;
                 }
                 viewPager.setCurrentItem(i++, true);
             }
-        };
+        };*/
         final GestureDetector fab = new GestureDetector(this, new fab1());
         final GestureDetector tapGestureDetector = new GestureDetector(this, new TapGestureListener());
         FloatingActionButton floatingActionButton = findViewById(R.id.fab);
@@ -128,8 +139,11 @@ public class Homescreen extends AppCompatActivity implements NavigationView.OnNa
                 return false;
             }
         });
+        recyclerView = findViewById(R.id.rv);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        recyclerView.setAdapter(new recycler_view(this, imgUrls));
 
-        viewPager.setOnTouchListener(new View.OnTouchListener() {
+   /*     viewPager.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
                 if (tapGestureDetector.onTouchEvent(event))
                     Toast.makeText(Homescreen.this, "Welcome", Toast.LENGTH_SHORT).show();
@@ -159,6 +173,8 @@ public class Homescreen extends AppCompatActivity implements NavigationView.OnNa
                 handler.post(Update);
             }
         }, 10000, 10000);
+*/
+
         button = findViewById(R.id.button);
 
         ngetlocation = findViewById(R.id.getLocation);
@@ -286,7 +302,7 @@ public class Homescreen extends AppCompatActivity implements NavigationView.OnNa
         return cityname;
     }
 
-    public void cabs(View view) {
+    public void cabs(View view) {/*
         Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.olacabs.customer");
         if (launchIntent != null)
             startActivity(launchIntent);
@@ -297,10 +313,13 @@ public class Homescreen extends AppCompatActivity implements NavigationView.OnNa
             CustomTabsIntent customTabsIntent = builder.build();
             builder.addDefaultShareMenuItem();
             customTabsIntent.launchUrl(this, Uri.parse(URL));
+*/
+        Intent i12 = new Intent(this, flight_details.class);
+        startActivity(i12);
 
 
-        }
     }
+    
 
     public void rooms(View view) {
         Intent i = getPackageManager().getLaunchIntentForPackage("com.oyo.consumer");
@@ -420,15 +439,16 @@ public class Homescreen extends AppCompatActivity implements NavigationView.OnNa
 
     }
 
-    public void getData(View view) {
-        Intent i = new Intent(this, flight_details.class);
-        startActivity(i);
 
-        //Toast.makeText(Homescreen.this, Date1, Toast.LENGTH_SHORT).show();
+    @Override
+    public void onBackPressed() {
 
-
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
-
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
@@ -451,14 +471,9 @@ public class Homescreen extends AppCompatActivity implements NavigationView.OnNa
 
     }
 
-    @Override
-    public void onBackPressed() {
+    public void getImage(View view) {
 
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
     }
+
 
 }
