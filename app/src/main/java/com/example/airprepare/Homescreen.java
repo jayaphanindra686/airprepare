@@ -122,7 +122,7 @@ public class Homescreen extends AppCompatActivity implements NavigationView.OnNa
                 if (i == 3) {
                     i = 0;
                 }
-                viewPager.setCurrentItem(i++, true);
+                 viewPager.setCurrentItem(i++, true);
             }
         };*/
         final GestureDetector fab = new GestureDetector(this, new fab1());
